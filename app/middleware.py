@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
+from starlette.responses import JSONResponse
 from app.config import KEYCLOAK_CLIENT_ID, KEYCLOAK_REALM, KEYCLOAK_URL
 import jwt
 import requests
@@ -52,7 +53,7 @@ class RBACMiddleware(BaseHTTPMiddleware):
                 public_key,
                 algorithms=["RS256"],
                 audience=client_id,
-                options={"verify_signature": True, "verify_aud": True},
+                options={"verify_signature": True, "verify_aud": False},
             )
 
             roles = payload.get("realm_access", {}).get("roles", [])
@@ -62,20 +63,18 @@ class RBACMiddleware(BaseHTTPMiddleware):
                 )
 
         except jwt.ExpiredSignatureError:
-            raise HTTPException(status_code=401, detail="Token has expired")
+            return JSONResponse(status_code=401, content={"error": "Token expired"})
         except jwt.InvalidAudienceError:
-            raise HTTPException(status_code=401, detail="Invalid audience")
+            return JSONResponse(status_code=401, content={"error": "Invalid audience"})
         except jwt.InvalidTokenError as e:
-            raise HTTPException(status_code=401, detail="Invalid token")
+            return JSONResponse(status_code=401, content={"error": "Invalid token"})
         except HTTPException as e:
-            raise HTTPException(status_code=e.status_code, detail=e.detail)
+            return JSONResponse(status_code=e.status_code, content={"error": e.detail})
         except requests.exceptions.RequestException as e:
             print(f"Error fetching JWKS: {e}")
-            raise HTTPException(
-                status_code=500, detail="Error fetching authentication keys"
-            )  # 500 error for backend errors
+            return JSONResponse(status_code=500, content={"error": "Error fetching authentication keys"})
         except Exception as e:  # Catch any other unexpected exceptions.
             print(f"Unexpected error during token verification: {e}")
-            raise HTTPException(status_code=500, detail="Internal Server Error")
+            return JSONResponse(status_code=500, content={"error": "Internal Server Error"})
 
         return await call_next(request)

@@ -22,7 +22,7 @@
         <button id="secureBtn" class="hidden w-full bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600 transition-colors mt-4">
             Check Secure Endpoint
         </button>
-        <div id="secureResponse" class="hidden mt-4 p-4 bg-gray-100 rounded-lg"></div>
+        <div id="secureResponse" class="hidden mt-4 p-4 bg-gray-100 rounded-lg">Hit the check button to see info</div>
     </div>
 
     <script>
@@ -107,7 +107,8 @@
                     this.logoutBtn.classList.remove('hidden');
                     this.secureBtn.classList.remove('hidden'); // Show secure endpoint button
                     this.userInfo.classList.remove('hidden');
-                    console.log(userData.realm_access?.roles);
+                    this.secureResponse.classList.remove('hidden')
+                    
                     this.userInfo.innerHTML = `
                         <div class="text-gray-600">
                             <p class="font-semibold text-lg">${userData.preferred_username || 'User'}</p>
@@ -119,6 +120,7 @@
                     this.logoutBtn.classList.add('hidden');
                     this.secureBtn.classList.add('hidden'); // Hide secure endpoint button
                     this.userInfo.classList.add('hidden');
+                    this.secureResponse.classList.add('hidden')
                 }
             }
 
@@ -138,8 +140,11 @@
                     this.secureResponse.classList.remove('hidden');
                     if (response.ok) {
                         this.secureResponse.innerHTML = `<p class="text-green-600">${data.message}</p>`;
+                    } else if (response.status == 403) {
+                        this.secureResponse.innerHTML = `<p class="text-yellow-600">You are not an Admin.</p>`;
                     } else {
                         this.secureResponse.innerHTML = `<p class="text-red-600">Failed to access secure endpoint. Please check your roles.</p>`;
+
                     }
                 } catch (error) {
                     console.error('Error checking secure endpoint:', error);
