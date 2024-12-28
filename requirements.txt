@@ -1,0 +1,5 @@
+fastapi
+uvicorn
+python-jose
+requests
+jinja2
