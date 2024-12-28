@@ -1,0 +1,23 @@
+version: "3.9"
+
+services:
+  fastapi-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: fastapi-container
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./app:/app  # Optional: for live updates during development
+    environment:
+      - APP_ENV=development
+
+  keycloak:
+    image: docker.io/rahul1115/keycloak:latest
+    container_name: keycloak
+    ports:
+      - "8080:8080"
+    environment:
+      - APP_ENV=development
+    command: bash -c "/opt/keycloak/bin/kc.sh start-dev" 

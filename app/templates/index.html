@@ -27,7 +27,7 @@
 
     <script>
         const config = {
-            keycloakUrl: "{{config.KEYCLOAK_URL}}",
+            keycloakUrl:  'http://localhost:8080' || "{{config.KEYCLOAK_URL}}",
             realm: "{{config.KEYCLOAK_REALM}}",
             clientId: "{{config.KEYCLOAK_CLIENT_ID}}",
             redirectUri: window.location.origin
@@ -92,7 +92,10 @@
 
             logout() {
                 localStorage.removeItem('token');
-                this.updateUI(null);
+                // this.updateUI(null);
+                const keycloakLogoutUrl = `${config.keycloakUrl}/realms/${config.realm}/protocol/openid-connect/logout`;
+                const redirectUri = encodeURIComponent(config.redirectUri);
+                window.location.href = `${keycloakLogoutUrl}?redirect_uri=${redirectUri}`;
             }
 
             checkToken() {
